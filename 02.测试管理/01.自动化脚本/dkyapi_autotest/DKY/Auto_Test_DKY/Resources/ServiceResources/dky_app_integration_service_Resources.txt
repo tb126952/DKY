@@ -1,0 +1,4 @@
+*** Variables ***
+@{URI_dky-app-integration-service}    api/v1/user/    api/v1/user/certificate    /api/v1/digitalkey/    /api/v1/digitalkey/    api/v1/digitalkey/close    /api/v1/user/revoke    /api/v1/user/dowload
+...               /api/v1/user/upload
+${URL_dky-app-integration-service}    http://dky-app-integration-service.devapps.opsocp.csvw.com

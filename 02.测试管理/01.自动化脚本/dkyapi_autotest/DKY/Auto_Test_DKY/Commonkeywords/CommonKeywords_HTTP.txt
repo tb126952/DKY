@@ -1,0 +1,75 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+
+*** Keywords ***
+common_post_method
+    [Arguments]    ${ne-api-gateway}    ${VCD_service}    ${data_json}=None    ${params}=None
+    #设置Header
+    Set Header Item    Content-Type    application/json
+    Set Header Item    Accept    application/json
+    #产生会话
+    ${session}    Create Session A    ${ne-api-gateway}
+    #Post得到返回
+    ${response}    Post Request A    ${session}    ${VCD_service}    ${data_json}    ${params}
+    log    ${response.text}
+    ${response_text}    Set Variable    ${response.text}
+    ${response_status_code }    Set Variable    ${response.status_code }
+    [Return]    ${response_text}    ${response.status_code}
+
+common_delete_method
+    [Arguments]    ${ne-api-gateway}    ${VCD_service}
+    #设置Header
+    Set Header Item    Content-Type    application/json
+    Set Header Item    Accept    application/json
+    #产生会话
+    ${session}    Create Session A    ${ne-api-gateway}
+    #Delete得到返回
+    ${response}    Delete Request A    ${session}    ${VCD_service}
+    log    ${response.text}
+    ${response_text}    Set Variable    ${response.text}
+    [Return]    ${response_text}
+
+common_put_method
+    [Arguments]    ${ne-api-gateway}    ${VCD_service}    ${data_json}
+    #设置Header
+    Set Header Item    Content-Type    application/json
+    Set Header Item    Accept    application/json
+    Set Header Item    Device    test
+    Set Header Item    TraceID    test
+    #产生会话
+    ${session}    Create Session A    ${ne-api-gateway}
+    #Put得到返回
+    ${response}    Put Request A    ${session}    ${VCD_service}    ${data_json}
+    log    ${response.text}
+    ${response_text}    Set Variable    ${response.text}
+    ${response_status_code}    Set Variable    ${response.status_code}
+    [Return]    ${response_text}    ${response_status_code}
+
+common_get_method
+    [Arguments]    ${ne-api-gateway}    ${VCD_service}    ${Param}
+    #设置Header
+    Set Header Item    Content-Type    application/json
+    Set Header Item    Accept    application/json
+    #产生会话
+    ${session}    Create Session A    ${ne-api-gateway}
+    #Get得到返回
+    ${response}    Get Request A    ${session}    ${VCD_service}    params=${Param}
+    log    ${response.text}
+    ${response_text}    Set Variable    ${response.text}
+    ${response_status_code}    Set Variable    ${response.status_code}
+    [Return]    ${response_text}    ${response_status_code}
+
+post_method_for_csr
+    [Arguments]    ${ne-api-gateway}    ${VCD_service}    ${data_json}=None    ${params}=None
+    #设置Header
+    Set Header Item    Content-Type    application/json
+    Set Header Item    Accept    application/json
+    #产生会话
+    ${session}    Create Session A    ${ne-api-gateway}
+    #Post得到返回
+    ${response}    Post2 Request A    ${session}    ${VCD_service}    ${data_json}
+    log    ${response.text}
+    ${response_text}    Set Variable    ${response.text}
+    ${response_status_code }    Set Variable    ${response.status_code }
+    [Return]    ${response_text}    ${response.status_code}

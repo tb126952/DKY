@@ -1,0 +1,40 @@
+*** Settings ***
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+Resource          ../../../../../Resources/ServiceResources/dky_pki-_ntegration_service_Resources.txt
+
+*** Test Cases ***
+验通过ocPackage生成正确的签名证书成功
+    #传入正确的ocPackage参数
+    ${data}    Set Variable    MIIBITCByAIBADBmMQswCQYDVQQGEwJBTzEPMA0GA1UECAwG55yB5Lu9MQ8wDQYD VQQHDAbln47luIIxEDAOBgNVBAoMB+WNleS9jTExDzANBgNVBAsMBumDqOmXqDES MBAGA1UEAxMJYmFpZHUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEX1NN G1T4Lo8bhJH+iJePP4UvgzPvEeTUirLxX6os8OZRrsS9Ym33qa/1ZwmBVvEHL6pn EKHN22zKYN+BQZt5eaAAMAoGCCqGSM49BAMCA0gAMEUCIQCtHnlAQbjqVCUQA1sY vmzjVpA+LGB6IuTPFiigRGWinAIgQDfOdS8gXP9NeADgkeAOFfNEb25vm7QSJgimHQwzgE=\n -----END CERTIFICATE REQUEST-----
+    log    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[0]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    Should Contain    ${response_text}    "data"
+
+验证ocPackage输入为空，通过ocPackage生成签名证书失败（X，提单）
+    #传入ocPackage参数为空
+    ${data}    Set Variable
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[0]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000001"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "系统繁忙，请稍后再试"
+    Should Not Contain    ${response_text}    "data"
+
+*** Keywords ***
+Suite_Teardown
+    conn_mysql    ${MYSQL_IP}    ${MYSQL_PORT}    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    @{MYSQL_NAME}[0]    ${MYSQL_Charset}
+    Run Keyword And Ignore Error    DB_Operation    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    delete from tm_user_cert where user_id='3239573283556';
+    close_mysql

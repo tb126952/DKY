@@ -1,0 +1,99 @@
+*** Settings ***
+Suite Setup       Suite_Teardown
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Resources/ServiceResources/dky_app_integration_service_Resources.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_SQL.txt
+Resource          ../../../../../Resources/SQLResources/mysql_Resources.txt
+
+*** Test Cases ***
+验证创建用户成功，电子钥匙状态为待配对
+    #获取userid，deviceid,vin码
+    ${user_id}    Set Variable    1202141646589042690
+    #传入正确的CSR数据，创建用户证书
+    ${data}    Set Variable    -----BEGIN CERTIFICATE REQUEST-----\n MIIBITCByAIBADBmMQswCQYDVQQGEwJBTzEPMA0GA1UECAwG55yB5Lu9MQ8wDQYD VQQHDAbln47luIIxEDAOBgNVBAoMB+WNleS9jTExDzANBgNVBAsMBumDqOmXqDES MBAGA1UEAxMJYmFpZHUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEX1NN G1T4Lo8bhJH+iJePP4UvgzPvEeTUirLxX6os8OZRrsS9Ym33qa/1ZwmBVvEHL6pn EKHN22zKYN+BQZt5eaAAMAoGCCqGSM49BAMCA0gAMEUCIQCtHnlAQbjqVCUQA1sY vmzjVpA+LGB6IuTPFiigRGWinAIgQDfOdS8gXP9NeADgkeAOFfNEb25vm7QSJgimHQwzgE=\n -----END CERTIFICATE REQUEST-----
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[1]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    ${UserCert}    Get Json Value    ${response_text}    /data
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "userCert": ${UserCert}, \ \ "userId": ${user_id} }
+    ${data_json}    TO JSON    ${data}
+    #传入正确参数创建用户，创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[0]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    ${data}    Get Json Value    ${response_text}    /data
+    Should Be Equal As Strings    ${data}    ${user_id}
+    #获取电子钥匙状态
+    ${Mysql_Staement}    Set Variable    select status from tm_p_user_cert where user_id=${user_id};
+    ${Mysql_result}    DB_Operation_Return    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    ${Mysql_Staement}
+    #断言电子钥匙为待配对状态
+    Should Be Equal As Strings    ${Mysql_result}    CONFIRM
+    #清理环境
+    Run Keyword And Ignore Error    DB_Operation    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    delete from tm_p_user_cert where user_id=${user_id} ;
+
+验证userid传入数据为空，创建用户失败
+    #传入正确的CSR数据，创建用户证书
+    ${data}    Set Variable    -----BEGIN CERTIFICATE REQUEST-----\n MIIBITCByAIBADBmMQswCQYDVQQGEwJBTzEPMA0GA1UECAwG55yB5Lu9MQ8wDQYD VQQHDAbln47luIIxEDAOBgNVBAoMB+WNleS9jTExDzANBgNVBAsMBumDqOmXqDES MBAGA1UEAxMJYmFpZHUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEX1NN G1T4Lo8bhJH+iJePP4UvgzPvEeTUirLxX6os8OZRrsS9Ym33qa/1ZwmBVvEHL6pn EKHN22zKYN+BQZt5eaAAMAoGCCqGSM49BAMCA0gAMEUCIQCtHnlAQbjqVCUQA1sY vmzjVpA+LGB6IuTPFiigRGWinAIgQDfOdS8gXP9NeADgkeAOFfNEb25vm7QSJgimHQwzgE=\n -----END CERTIFICATE REQUEST-----
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[1]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    ${UserCert}    Get Json Value    ${response_text}    /data
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "userCert": ${UserCert}, \ \ "userId": "" }
+    ${data_json}    TO JSON    ${data}
+    #传入正确参数创建用户，创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[0]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "004033"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "用户编号必须填写"
+
+验证userCert传入数据为空，创建用户失败
+    #获取userid，deviceid,vin码
+    ${user_id}    Set Variable    1202141646589042690
+    # 设置 Param,用户证书为空
+    ${data}    Set Variable    { \ \ "userCert":"", \ \ "userId": ${user_id} }
+    ${data_json}    TO JSON    ${data}
+    #传入参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[0]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "004033"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "用户证书必须填写"
+
+缺少usercert、userid正确性校验，待MOS、BOSCH提供接口后补充
+
+验证创建用户失败，进行重试操作（待实现）
+
+*** Keywords ***
+Suite_Teardown
+    conn_mysql    ${MYSQL_IP}    ${MYSQL_PORT}    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    @{MYSQL_NAME}[0]    ${MYSQL_Charset}
+    Run Keyword And Ignore Error    DB_Operation    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    delete from tm_user_cert where user_id='3239573283556';
+    close_mysql

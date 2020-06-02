@@ -1,0 +1,47 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           MongoDBLibrary
+
+*** Keywords ***
+conn_mysql
+    [Arguments]    ${IP}    ${PORT}    ${UserName}    ${PassWord}    ${DBName}    ${charset}
+    [Documentation]    描述：连接MY_SQL 数据库
+    ...    参数：
+    ...    \ \ IP : 数据库IP
+    ...    \ PORT: 数据库PORT 3306
+    ...    UserName：数据库名称
+    ...    PassWord：数据库秘密
+    ...    DBName：数据库名
+    ...    charset：编码格式
+    Connect To Database Using Custom Params    pymysql    host='${IP}', port=${PORT}, user='${UserName}', passwd='${PassWord}',db='${DBName}',charset='${charset}'
+
+exe_sql
+    [Arguments]    ${sql}
+    [Documentation]    描述： 执行SQL语句
+    ...    参数：
+    ...    \ \ SQL: 执行的数据库SQL语句
+    Execute Sql String    ${sql}
+
+close_mysql
+    [Documentation]    描述：关闭数据库连接
+    Disconnect From Database
+
+DB_Operation_Return
+    [Arguments]    ${Mysql_Name}    ${Mysql_Username}    ${Mysql_Password}    ${Mysql_IP}    ${Mysql_port}    ${Mysql_Staement}
+    Connect To Database Using Custom Params    pymysql    database="${Mysql_Name}",user="${Mysql_Username}",password="${Mysql_Password}",host="${Mysql_IP}",port=${Mysql_port},charset="utf8" \ \
+    ${Mysql_result}    Query    ${Mysql_Staement}
+    ${Mysql_result}    Set Variable    ${Mysql_result[0][0]}
+    [Return]    ${Mysql_result}
+
+DB_Operation
+    [Arguments]    ${Mysql_Name}    ${Mysql_Username}    ${Mysql_Password}    ${Mysql_IP}    ${Mysql_port}    ${Mysql_Staement}
+    Connect To Database Using Custom Params    pymysql    database="${Mysql_Name}",user="${Mysql_Username}",password="${Mysql_Password}",host="${Mysql_IP}",port=${Mysql_port},charset="utf8" \ \
+    Execute Sql String    ${Mysql_Staement}
+
+DB_Mongo
+    [Arguments]    ${Mongodb_IP}    ${Mongodb_port}    ${Mongodb_name}    ${Mongodb_table_name}    ${operation}
+    Comment    Connect To Mongodb    mongodb://172.25.1.15    8081
+    Connect To Mongodb    ${Mongodb_IP}    ${Mongodb_port}
+    ${Mongodb_result}    Retrieve Some Mongodb Records    ${Mongodb_name}    ${Mongodb_table_name}    ${operation}
+    log    ${Mongodb_result}
+    [Return]    ${Mongodb_result}

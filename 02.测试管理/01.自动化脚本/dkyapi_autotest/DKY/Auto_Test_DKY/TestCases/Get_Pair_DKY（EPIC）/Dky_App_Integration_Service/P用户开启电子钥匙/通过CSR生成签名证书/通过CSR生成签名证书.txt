@@ -1,0 +1,52 @@
+*** Settings ***
+Suite Teardown
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Resources/ServiceResources/dky_app_integration_service_Resources.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+
+*** Test Cases ***
+验证传入正确的CSR数据，生成签名证书成功
+    #传入正确的CSR数据
+    ${data}    Set Variable    -----BEGIN CERTIFICATE REQUEST-----\n MIIBITCByAIBADBmMQswCQYDVQQGEwJBTzEPMA0GA1UECAwG55yB5Lu9MQ8wDQYD VQQHDAbln47luIIxEDAOBgNVBAoMB+WNleS9jTExDzANBgNVBAsMBumDqOmXqDES MBAGA1UEAxMJYmFpZHUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEX1NN G1T4Lo8bhJH+iJePP4UvgzPvEeTUirLxX6os8OZRrsS9Ym33qa/1ZwmBVvEHL6pn EKHN22zKYN+BQZt5eaAAMAoGCCqGSM49BAMCA0gAMEUCIQCtHnlAQbjqVCUQA1sY vmzjVpA+LGB6IuTPFiigRGWinAIgQDfOdS8gXP9NeADgkeAOFfNEb25vm7QSJgimHQwzgE=\n -----END CERTIFICATE REQUEST-----
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[1]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+
+验证传入不正确的CSR数据，生成签名失败
+    #传入不正确的CSR数据（非CSR格式）
+    ${data}    Set Variable    MIIBITCByAIBADBmMQswCQYDVQQGEwJBTzEPMA0GA1UECAwG55yB5Lu9MQ8wDQYD VQQHDAbln47luIIxEDAOBgNVBAoMB+WNleS9jTExDzANBgNVBAsMBumDqOmXqDES MBAGA1UEAxMJYmFpZHUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEX1NN G1T4Lo8bhJH+iJePP4UvgzPvEeTUirLxX6os8OZRrsS9Ym33qa/1ZwmBVvEHL6pn EKHN22zKYN+BQZt5eaAAMAoGCCqGSM49BAMCA0gAMEUCIQCtHnlAQbjqVCUQA1sY vmzjVpA+LGB6IuTPFiigRGWinAIgQDfOdS8gXP9NeADgkeAOFfNEb25vm7QSJgimHQwzgE=\n -----END CERTIFICATE REQUEST-----
+    log    ${data}
+    #传入正确的CSR文件生成签名证书
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[1]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000001"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "系统繁忙，请稍后再试"
+
+验证CSR数据为空，生成签名失败
+    #传入CSR数据为空
+    ${data}    Set Variable
+    ${response_text}    ${response_tatus_code}    post_method_for_csr    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[1]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "参数类型转换错误"
+
+*** Keywords ***
+Suite_Teardown
+    conn_mysql    ${MYSQL_IP}    ${MYSQL_PORT}    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    @{MYSQL_NAME}[0]    ${MYSQL_Charset}
+    Run Keyword And Ignore Error    DB_Operation    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    delete from tm_user_cert where user_id='3239573283556';
+    close_mysql

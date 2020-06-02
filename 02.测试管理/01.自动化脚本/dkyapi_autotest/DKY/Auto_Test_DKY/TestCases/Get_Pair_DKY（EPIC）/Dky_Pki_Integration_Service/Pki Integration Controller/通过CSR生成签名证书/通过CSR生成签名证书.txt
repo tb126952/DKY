@@ -1,0 +1,126 @@
+*** Settings ***
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+Resource          ../../../../../Resources/ServiceResources/dky_pki-_ntegration_service_Resources.txt
+
+*** Test Cases ***
+验证传入正确的CSR与validDays数据，生成签名证书成功
+    #构造正确的CSR文件
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 1 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    Should Contain    ${response_text}    "data"
+
+验证传入不正确的CSR数据，生成签名失败
+    #传入不正确的CSR数据
+    ${data}    Set Variable    {"csr": "XICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 1 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "777001"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "通过CSR签名失败"
+
+验证CSR数据为空，生成签名失败
+    #传入CSR值为空
+    ${data}    Set Variable    { \ \ "csr": "", \ \ "validDays": 1 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "004033"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "请输入合法csr"
+
+验证validDays值大于边界36500
+    #构造validDays值大于边界36500
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 36501 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "777002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "请输入1-36500合法数字"
+
+验证validDays值小于边界0
+    #构造validDays值小于边界0
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 0 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "777002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "请输入1-36500合法数字"
+
+验证validDays值为空，生成签名失败
+    #构造validDays值为空
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": "" }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "004033"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "请输入正确有效期"
+
+验证validDays值为非数字，生成签名失败
+    #构造validDays值为非数字
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": "qwer" }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+
+验证validDays值为边界上，生成签名成功
+    #构造validDays值等于边界36500和1
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 36500 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    Should Contain    ${response_text}    "data"
+    #构造validDays值等于边界1
+    ${data}    Set Variable    {"csr": "-----BEGIN CERTIFICATE REQUEST-----\\nMIICijCCAXICAQAwRTELMAkGA1UEBhMCQ04xETAPBgNVBAgTCHNoYW5naGFpMREw\\nDwYDVQQHEwhzaGFuZ2hhaTEQMA4GA1UEAxMHYWJjLmNvbTCCASIwDQYJKoZIhvcN\\nAQEBBQADggEPADCCAQoCggEBAMHEJmbNDvZupmGta6KXbvoB4psksdBeZr/UOWxJ\\nXpj7mU2CYbZLXmRrzepNadFmXpjR38XRq1/SuVzSy/s55pqUm7tdnjb3lChSY0La\\nrgSjqBcHhid0YySg9rl8OTispGpKfVmth5SSgFSPzP0k2w7PU+N4rvRJE+18Bpdt\\npA5x0zRBHzg2n17hb/VNMarAwS9Xue4pI9lbHa3MdQ0TRiTs7T1/OCJEedZxe2qk\\nax7fqUWJtfCUkBnV/f+fq6NB2Gva2McBn+f+p++XMx45bztoO7PLl/jtEKQxhq4k\\nVP3JwN4SJLdNjmr/IS0ikp8w0gkAoj/A4+jtDnZ3AyqPUMcCAwEAAaAAMA0GCSqG\\nSIb3DQEBCwUAA4IBAQCLbZwMZTr8KG9pWbm6PRuMXDij+soEMsUyt3DmMwwRvvhT\\nClBkrHtap00cT5/GhKxxIAL3+TV0WouSVe5mt3cqfEstr+MolTfGcjSnxJgEx/mO\\nAgY6fXXlhck34scOmXYRE0e00+hJgPanq5ibIVJ7fuPJS9L5IbE7glEEdzhaEYj4\\n0xqeEPCW9RL/noZRf9kv09wWy22a5GlXlCEaZDY6D+PtRFxYMWd9ZaDNTcX7dZUN\\nK97FA6PzKes0LO/DFskrzIMusFALUD61XPtmd7wZkRdCZUTrGsiDmsOJLk6CgolX\\ndG/eHZfWRbnPewWaX/kgI0t7JMeCbHQZ/VnPOAla\\n-----END CERTIFICATE REQUEST-----", \ \ "validDays": 1 }
+    ${data_json}    TO JSON    ${data}
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-pki-integration-service}    @{URI_dky-pki-integration-service}[1]    ${data_json}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    Should Contain    ${response_text}    "data"
+
+*** Keywords ***
+Suite_Teardown
+    conn_mysql    ${MYSQL_IP}    ${MYSQL_PORT}    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    @{MYSQL_NAME}[0]    ${MYSQL_Charset}
+    Run Keyword And Ignore Error    DB_Operation    @{MYSQL_NAME}[0]    ${MYSQL_USERNAME}    ${MYSQL_PASSWORD}    ${MYSQL_IP}    ${MYSQL_PORT}
+    ...    delete from tm_user_cert where user_id='3239573283556';
+    close_mysql

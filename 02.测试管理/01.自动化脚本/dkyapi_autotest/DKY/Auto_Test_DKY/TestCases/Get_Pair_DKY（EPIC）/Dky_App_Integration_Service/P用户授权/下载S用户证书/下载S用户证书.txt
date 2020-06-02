@@ -1,0 +1,49 @@
+*** Settings ***
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Resources/ServiceResources/dky_app_integration_service_Resources.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_SQL.txt
+Resource          ../../../../../Resources/SQLResources/mysql_Resources.txt
+
+*** Test Cases ***
+验证下载S用户证书成功
+    ${puser_id}    Set Variable    12345356771
+    ${suser_id}    Set Variable    567765567
+    ${cert}    Set Variable    123455
+    # 设置 Param
+    ${data}    Set Variable    { \ "puserId": ${puser_id}, \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": ${cert}, \ \ \ \ \ \ "userId": ${suser_id}\ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[7]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    # 设置 Param
+    ${data}    Set Variable    {"pUserId": ${puser_id},"sUserId": ${suser_id}}
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_get_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[6]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+    ${data}    Get Json Value    ${response_text}    /data/0
+    Should Be Equal As Strings    ${data}    "${cert}"
+
+验证pUserId为空时，下载S用户证书失败
+
+验证sUserId为空时，下载S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_get_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[6]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "666033"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "必填参数[sUserId]不能为空!"

@@ -1,0 +1,3 @@
+*** Variables ***
+@{URI_dky-pki-integration-service}    /api/v1/pky-integration/ownershipCode    /api/v1/pky-integration/userCertificate
+${URL_dky-pki-integration-service}    http://dky-pki-integration-service.devapps.opsocp.csvw.com

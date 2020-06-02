@@ -1,0 +1,96 @@
+*** Settings ***
+Library           ../../../../../Interface/CustomizationHttpActionWord.py
+Library           HttpLibrary.HTTP
+Resource          ../../../../../Resources/ServiceResources/dky_app_integration_service_Resources.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_HTTP.txt
+Resource          ../../../../../Commonkeywords/CommonKeywords_SQL.txt
+Resource          ../../../../../Resources/SQLResources/mysql_Resources.txt
+
+*** Test Cases ***
+验证取消S用户证书成功
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"1111", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"0124" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    200
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000000"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "Success"
+
+验证PuserId为空，取消S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"1256" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "666009"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "P用户编号不能为空"
+
+验证SuserId用户为空，取消S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"1212", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    500
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "666012"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "S用户编号不能为空"
+
+验证PuserId输入不支持的字符，取消S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"!@#$%^&*<>?", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"1111" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "参数类型转换错误"
+
+验证suserId输入不支持的字符，取消S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"112231", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"!@#$%^&*<>?12" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "参数类型转换错误"
+
+验证PuserId输入过长时，取消S用户证书失败
+    # 设置 Param
+    ${data}    Set Variable    { \ \ "puserId":"112231111111111111111111111111111111111111111111111111111111111111111222222222", \ \ "suserInfos": [ \ \ \ \ { \ \ \ \ \ \ "userCert": "string", \ \ \ \ \ \ "userId":"112" \ \ \ \ } \ \ ] }
+    ${data}    To Json    ${data}
+    #传入正确参数创建用户
+    ${response_text}    ${response_tatus_code}    common_post_method    ${URL_dky-app-integration-service}    @{URI_dky-app-integration-service}[5]    ${data}
+    #断言返回的Http Code
+    Should Be Equal As Strings    ${response_tatus_code}    400
+    #断言返回的参数
+    ${code}    Get Json Value    ${response_text}    /code
+    Should Be Equal As Strings    ${code}    "000002"
+    ${description}    Get Json Value    ${response_text}    /description
+    Should Be Equal As Strings    ${description}    "参数类型转换错误"
+
+验证PuserId不存在时，取消S用户证书失败
+
+验证SuserId不存在时，取消S用户证书失败

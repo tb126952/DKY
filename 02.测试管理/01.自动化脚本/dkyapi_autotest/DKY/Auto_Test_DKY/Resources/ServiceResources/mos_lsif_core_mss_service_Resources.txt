@@ -1,0 +1,3 @@
+*** Variables ***
+@{URI_mos-lsif-core-mss}    /mos-lsif-core-mss/api/v2/enrollment/user
+${URL_mos-lsif-core-mss}    http://mos-lsif-core-mss.devapps.opsocp.csvw.com
